@@ -110,28 +110,43 @@ def generate_qr_code(url, size=120):
     qr_img = qr_img.resize((size, size), Image.Resampling.LANCZOS)
     return qr_img
 
-def load_and_crop_square(image_path, target_size=430):
-    """Loads an image, crops it to 1:1 aspect ratio from center, and resizes to target_size."""
+def load_and_crop_image(image_path, target_width=480, target_height=360):
+    """Loads an image, crops it to target_width:target_height aspect ratio from center, and resizes it."""
     if not image_path or not os.path.exists(image_path):
         return None
     try:
         with Image.open(image_path) as img:
             img = img.convert("RGB")
-            width, height = img.size
-            min_dim = min(width, height)
+            img_w, img_h = img.size
             
-            # Crop from the center
-            left = (width - min_dim) / 2
-            top = (height - min_dim) / 2
-            right = (width + min_dim) / 2
-            bottom = (height + min_dim) / 2
+            # Calculate aspect ratios
+            target_ratio = target_width / target_height
+            img_ratio = img_w / img_h
             
+            if img_ratio > target_ratio:
+                # Image is wider than target ratio, crop horizontal sides
+                crop_h = img_h
+                crop_w = int(crop_h * target_ratio)
+                left = (img_w - crop_w) / 2
+                top = 0
+                right = left + crop_w
+                bottom = crop_h
+            else:
+                # Image is taller than target ratio, crop vertical sides
+                crop_w = img_w
+                crop_h = int(crop_w / target_ratio)
+                left = 0
+                top = (img_h - crop_h) / 2
+                right = crop_w
+                bottom = top + crop_h
+                
             cropped = img.crop((left, top, right, bottom))
-            resized = cropped.resize((target_size, target_size), Image.Resampling.LANCZOS)
+            resized = cropped.resize((target_width, target_height), Image.Resampling.LANCZOS)
             return resized
     except Exception as e:
         print(f"Error loading/cropping image {image_path}: {e}")
         return None
+
 
 def create_rounded_mask(size, radius=16):
     """Creates a 1-channel 'L' mask image with rounded corners."""
@@ -236,9 +251,9 @@ def draw_card(row):
     if secondary_muscles.lower() == "nan":
         secondary_muscles = ""
         
-    # Load and crop exercise images as raw squares
-    img1 = load_and_crop_square(img1_path, target_size=430)
-    img2 = load_and_crop_square(img2_path, target_size=430)
+    # Load and crop exercise images with a wider 4:3 aspect ratio, taking up more vertical space
+    img1 = load_and_crop_image(img1_path, target_width=560, target_height=420)
+    img2 = load_and_crop_image(img2_path, target_width=560, target_height=420)
     has_images = img1 is not None or img2 is not None
     has_qr = bool(video_url)
     
@@ -299,8 +314,8 @@ def draw_card(row):
     
     # 4. Determine Text wrapping column width
     if has_images:
-        # Left column is constrained to leave a 50px gap before Column 2 (which starts at x=1320)
-        cues_max_width = 1320 - SAFE_MARGIN - 50 # 1220px usable width
+        # Left column is constrained to leave a 50px gap before Column 2 (which starts at x=1190)
+        cues_max_width = 1190 - SAFE_MARGIN - 50 # 1090px usable width
     else:
         cues_max_width = USABLE_WIDTH # 1700px usable width
         
@@ -367,7 +382,7 @@ def draw_card(row):
         mistake_title_font = load_system_font("Arial Bold.ttf", 30)
         COLOR_WARNING = "#E11D48" # Premium Rose/Coral Warning Color
         
-        draw.text((SAFE_MARGIN, y_offset), "VEELVOORKOMENDE FOUT", fill=COLOR_WARNING, font=mistake_title_font)
+        draw.text((SAFE_MARGIN, y_offset), "VEELVOORKOMENDE FOUT", fill=COLOR_ACCENT, font=mistake_title_font)
         y_offset += 46
         
         mistake_body_font = load_system_font("Arial.ttf", 28)
@@ -377,7 +392,7 @@ def draw_card(row):
         bar_height = len(mistake_lines) * line_h
         draw.rectangle(
             [(SAFE_MARGIN, y_offset + 4), (SAFE_MARGIN + 6, y_offset + 4 + bar_height - 8)],
-            fill=COLOR_WARNING
+            fill=COLOR_ACCENT
         )
         
         for line in mistake_lines:
@@ -390,8 +405,8 @@ def draw_card(row):
     if prim_list or sec_list or has_qr:
         # Allocate bottom grid widths
         if has_images:
-            muscles_max_width = 720
-            qr_card_x = SAFE_MARGIN + 760 # 810px
+            muscles_max_width = 590
+            qr_card_x = SAFE_MARGIN + 630 # 680px
             qr_card_w = 460
         else:
             muscles_max_width = 1180
@@ -456,16 +471,17 @@ def draw_card(row):
 
     # 9. Render Stacked Demonstration Images (with rounded corners and rounded outlines)
     if has_images:
-        img_x = 1320
-        img_size = 430
-        mask = create_rounded_mask((img_size, img_size), radius=16)
+        img_x = 1190
+        img_w = 560
+        img_h = 420
+        mask = create_rounded_mask((img_w, img_h), radius=16)
         
         # Image 1 (POSITION 1)
         if img1:
             img_y1 = 230
             img.paste(img1, (img_x, img_y1), mask=mask)
             draw.rounded_rectangle(
-                [(img_x - 1, img_y1 - 1), (img_x + img_size, img_y1 + img_size)],
+                [(img_x - 1, img_y1 - 1), (img_x + img_w, img_y1 + img_h)],
                 radius=16,
                 outline=COLOR_CARD_BORDER,
                 width=2
@@ -473,10 +489,10 @@ def draw_card(row):
             
         # Image 2 (POSITION 2)
         if img2:
-            img_y2 = 690
+            img_y2 = 700
             img.paste(img2, (img_x, img_y2), mask=mask)
             draw.rounded_rectangle(
-                [(img_x - 1, img_y2 - 1), (img_x + img_size, img_y2 + img_size)],
+                [(img_x - 1, img_y2 - 1), (img_x + img_w, img_y2 + img_h)],
                 radius=16,
                 outline=COLOR_CARD_BORDER,
                 width=2

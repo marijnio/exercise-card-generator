@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,30 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --bg-main: #0F172A;       /* Slate 900 */
-            --bg-sidebar: #1E293B;    /* Slate 800 */
-            --bg-card: #334155;       /* Slate 700 */
-            --border-color: #475569;  /* Slate 600 */
-            --text-main: #F8FAFC;     /* Slate 50 */
-            --text-muted: #94A3B8;    /* Slate 400 */
-            --accent-teal: #0D9488;   /* Teal 600 */
-            --accent-teal-hover: #14B8A6; /* Teal 500 */
-            --danger-red: #EF4444;    /* Red 500 */
-            --success-green: #22C55E; /* Green 500 */
+            --bg-main: #0F172A;
+            /* Slate 900 */
+            --bg-sidebar: #1E293B;
+            /* Slate 800 */
+            --bg-card: #334155;
+            /* Slate 700 */
+            --border-color: #475569;
+            /* Slate 600 */
+            --text-main: #F8FAFC;
+            /* Slate 50 */
+            --text-muted: #94A3B8;
+            /* Slate 400 */
+            --accent-teal: #0D9488;
+            /* Teal 600 */
+            --accent-teal-hover: #14B8A6;
+            /* Teal 500 */
+            --danger-red: #EF4444;
+            /* Red 500 */
+            --success-green: #22C55E;
+            /* Green 500 */
         }
 
         * {
@@ -292,7 +304,8 @@
             letter-spacing: 0.5px;
         }
 
-        input[type="text"], textarea {
+        input[type="text"],
+        textarea {
             width: 100%;
             padding: 12px 16px;
             background-color: var(--bg-sidebar);
@@ -305,7 +318,8 @@
             font-family: inherit;
         }
 
-        input[type="text"]:focus, textarea:focus {
+        input[type="text"]:focus,
+        textarea:focus {
             border-color: var(--accent-teal);
         }
 
@@ -417,7 +431,8 @@
             border: 1px solid var(--border-color);
             overflow: hidden;
             background-color: var(--bg-main);
-            aspect-ratio: 1.5; /* 3:2 aspect ratio */
+            aspect-ratio: 1.5;
+            /* 3:2 aspect ratio */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -482,33 +497,48 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Clean Scrollbars */
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
+
         ::-webkit-scrollbar-thumb {
             background: var(--border-color);
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-muted);
         }
     </style>
 </head>
+
 <body>
 
     <!-- Sidebar component -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h1>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
                 Kaarten Manager
             </h1>
             <div class="search-sort-container">
@@ -526,7 +556,10 @@
         </div>
         <div class="sidebar-footer">
             <button class="btn btn-secondary" id="btn-new-exercise" onclick="createNewExercise()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
                 Nieuw
             </button>
             <button class="btn btn-primary" id="btn-generate" onclick="generateAllCards()">
@@ -540,7 +573,8 @@
         <div class="main-header">
             <h2 id="editor-title">Oefening Bewerken</h2>
             <div style="display: flex; gap: 12px;">
-                <button class="btn btn-secondary" onclick="deleteCurrentExercise()" id="btn-delete" style="display:none;">Verwijder</button>
+                <button class="btn btn-secondary" onclick="deleteCurrentExercise()" id="btn-delete"
+                    style="display:none;">Verwijder</button>
                 <button class="btn btn-primary" onclick="saveCurrentExercise()">Opslaan</button>
             </div>
         </div>
@@ -564,25 +598,34 @@
                         </div>
                         <div class="form-group form-group-full">
                             <label for="input-description">Overzicht Beschrijving (Nederlands)</label>
-                            <textarea id="input-description" placeholder="Voer een korte omschrijving in van de oefening en de voordelen..."></textarea>
+                            <textarea id="input-description"
+                                placeholder="Voer een korte omschrijving in van de oefening en de voordelen..."></textarea>
                         </div>
                         <div class="form-group form-group-full">
                             <label>Correcte Uitvoering (Nederlands)</label>
-                            <div id="instructions-container" style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px;">
+                            <div id="instructions-container"
+                                style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px;">
                                 <!-- Dynamic steps will be inserted here -->
                             </div>
-                            <button class="btn btn-secondary" type="button" onclick="addInstructionStep('')" style="align-self: flex-start; padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 4px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <button class="btn btn-secondary" type="button" onclick="addInstructionStep('')"
+                                style="align-self: flex-start; padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
                                 Stap Toevoegen
                             </button>
                         </div>
                         <div class="form-group form-group-full">
-                            <label for="input-avoid-mistake">Veelvoorkomende Fout (Nederlands)</label>
-                            <input type="text" id="input-avoid-mistake" placeholder="bijv. Laat je knieën niet naar binnen vallen en voorkom dat je hakken loskomen.">
+                            <label for="input-avoid-mistake">Veelvoorkomende Fout</label>
+                            <input type="text" id="input-avoid-mistake"
+                                placeholder="bijv. Laat je knieën niet naar binnen vallen en voorkom dat je hakken loskomen.">
                         </div>
                         <div class="form-group form-group-full">
                             <label for="input-video-url">Video Instructie URL (Optioneel)</label>
-                            <input type="text" id="input-video-url" placeholder="https://www.youtube.com/... (Genereert QR-code op de kaart)">
+                            <input type="text" id="input-video-url"
+                                placeholder="https://www.youtube.com/... (Genereert QR-code op de kaart)">
                         </div>
                         <div class="form-group">
                             <label for="input-primary-muscles">Primaire Spieren (Komma gescheiden)</label>
@@ -590,14 +633,17 @@
                         </div>
                         <div class="form-group">
                             <label for="input-secondary-muscles">Secundaire Spieren (Komma gescheiden)</label>
-                            <input type="text" id="input-secondary-muscles" placeholder="bijv. Core, Schouders, Onderrug">
+                            <input type="text" id="input-secondary-muscles"
+                                placeholder="bijv. Core, Schouders, Onderrug">
                         </div>
                     </div>
                 </form>
 
                 <!-- File uploads hidden inputs -->
-                <input type="file" id="file-upload-1" accept="image/*" style="display: none;" onchange="handleFileSelected(1)">
-                <input type="file" id="file-upload-2" accept="image/*" style="display: none;" onchange="handleFileSelected(2)">
+                <input type="file" id="file-upload-1" accept="image/*" style="display: none;"
+                    onchange="handleFileSelected(1)">
+                <input type="file" id="file-upload-2" accept="image/*" style="display: none;"
+                    onchange="handleFileSelected(2)">
 
                 <!-- Image manager slots -->
                 <div class="image-uploader-section">
@@ -606,9 +652,14 @@
                         <!-- Image 1 -->
                         <div class="image-slot" id="image-slot-1" onclick="triggerFileUpload(1)">
                             <div class="image-slot-placeholder" id="placeholder-1">
-                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
                                 <div>
-                                    <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Zet Positie 1 neer</p>
+                                    <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Zet Positie 1 neer
+                                    </p>
                                     <p style="font-size:12px;">Klik om te uploaden</p>
                                 </div>
                             </div>
@@ -619,9 +670,14 @@
                         <!-- Image 2 -->
                         <div class="image-slot" id="image-slot-2" onclick="triggerFileUpload(2)">
                             <div class="image-slot-placeholder" id="placeholder-2">
-                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
                                 <div>
-                                    <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Zet Positie 2 neer</p>
+                                    <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Zet Positie 2 neer
+                                    </p>
                                     <p style="font-size:12px;">Klik om te uploaden</p>
                                 </div>
                             </div>
@@ -637,7 +693,8 @@
                 <h3>Kaart Live Preview</h3>
                 <div class="card-preview-container" id="card-preview-container">
                     <div class="card-preview-empty">
-                        Geen kaart gegenereerd of geladen. Klik op 'Opslaan' en daarna op 'Genereer Kaarten' om de live kaart hier te zien.
+                        Geen kaart gegenereerd of geladen. Klik op 'Opslaan' en daarna op 'Genereer Kaarten' om de live
+                        kaart hier te zien.
                     </div>
                     <img id="card-preview-img" style="display:none;">
                 </div>
@@ -655,7 +712,7 @@
         let activeExercise = null;
         let originalExerciseName = "";
 
-        document.getElementById('search-input').addEventListener('input', function(e) {
+        document.getElementById('search-input').addEventListener('input', function (e) {
             renderList(e.target.value);
         });
 
@@ -665,7 +722,7 @@
                 const res = await fetch('/api/exercises');
                 allExercises = await res.json();
                 renderList();
-                
+
                 // Keep active selected or load first
                 if (allExercises.length > 0) {
                     if (activeExercise) {
@@ -689,8 +746,8 @@
         function renderList(filter = "") {
             const listContainer = document.getElementById('exercise-list');
             listContainer.innerHTML = "";
-            
-            const filtered = allExercises.filter(ex => 
+
+            const filtered = allExercises.filter(ex =>
                 ex.Exercise_Name.toLowerCase().includes(filter.toLowerCase()) ||
                 ex.Print_Name.toLowerCase().includes(filter.toLowerCase()) ||
                 (ex.ID && ex.ID.toLowerCase().includes(filter.toLowerCase()))
@@ -723,11 +780,11 @@
                 if (activeExercise && ex.Exercise_Name === activeExercise.Exercise_Name) {
                     item.className += ' active';
                 }
-                
+
                 // Indicators for images
                 const statusImg1 = ex.has_img1 ? 'active' : 'inactive';
                 const statusImg2 = ex.has_img2 ? 'active' : 'inactive';
-                
+
                 item.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
                         <span class="exercise-item-id">#${ex.ID}</span>
@@ -741,7 +798,7 @@
                         </span>
                     </div>
                 `;
-                
+
                 item.onclick = () => selectExercise(ex);
                 listContainer.appendChild(item);
             });
@@ -750,10 +807,10 @@
         function selectExercise(ex) {
             activeExercise = ex;
             originalExerciseName = ex.Exercise_Name;
-            
+
             document.getElementById('editor-title').innerText = "Oefening: " + ex.Print_Name;
             document.getElementById('btn-delete').style.display = "inline-block";
-            
+
             // Populate form
             document.getElementById('input-card-id').value = ex.ID || "";
             document.getElementById('input-english-name').value = ex.Exercise_Name;
@@ -785,15 +842,15 @@
             document.getElementById('input-video-url').value = ex.Video_URL;
             document.getElementById('input-primary-muscles').value = ex.Primary_Muscles;
             document.getElementById('input-secondary-muscles').value = ex.Secondary_Muscles;
-            
+
             // Load photos previews
             setPhotoPreview(1, ex.has_img1 ? ex.img1_path : null);
             setPhotoPreview(2, ex.has_img2 ? ex.img2_path : null);
-            
+
             // Live card preview
             const previewContainer = document.getElementById('card-preview-container');
             const previewImg = document.getElementById('card-preview-img');
-            
+
             if (ex.card_path) {
                 // Add timestamp to prevent browser cache from holding old generated JPEGs
                 previewImg.src = ex.card_path + "?t=" + new Date().getTime();
@@ -808,7 +865,7 @@
                     emptyMsg.style.display = 'block';
                 }
             }
-            
+
             // Refresh selection highlighting
             renderList(document.getElementById('search-input').value);
         }
@@ -820,7 +877,7 @@
             stepDiv.style.display = 'flex';
             stepDiv.style.gap = '8px';
             stepDiv.style.alignItems = 'center';
-            
+
             stepDiv.innerHTML = `
                 <span class="step-number" style="font-weight:600; color:var(--accent-teal); font-size:14px; min-width:20px;"></span>
                 <input type="text" class="input-step" placeholder="Voer instructiestap in..." value="${value.replace(/"/g, '&quot;')}" style="flex:1;">
@@ -828,7 +885,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                 </button>
             `;
-            
+
             container.appendChild(stepDiv);
             updateStepNumbers();
         }
@@ -853,20 +910,20 @@
         function createNewExercise() {
             activeExercise = null;
             originalExerciseName = "";
-            
+
             document.getElementById('editor-title').innerText = "Nieuwe Oefening Toevoegen";
             document.getElementById('btn-delete').style.display = "none";
             document.getElementById('exercise-form').reset();
-            
+
             // Clear and add one empty instruction step
             const container = document.getElementById('instructions-container');
             container.innerHTML = "";
             addInstructionStep("");
-            
+
             // Clear slot previews
             setPhotoPreview(1, null);
             setPhotoPreview(2, null);
-            
+
             // Clear card preview
             const previewContainer = document.getElementById('card-preview-container');
             const previewImg = document.getElementById('card-preview-img');
@@ -875,7 +932,7 @@
             if (emptyMsg) {
                 emptyMsg.style.display = 'block';
             }
-            
+
             // Unselect in list
             renderList(document.getElementById('search-input').value);
         }
@@ -883,7 +940,7 @@
         function setPhotoPreview(index, path) {
             const preview = document.getElementById(`img-preview-${index}`);
             const placeholder = document.getElementById(`placeholder-${index}`);
-            
+
             if (path) {
                 preview.src = path + "?t=" + new Date().getTime();
                 preview.style.display = 'block';
@@ -906,13 +963,13 @@
         async function handleFileSelected(index) {
             const fileInput = document.getElementById(`file-upload-${index}`);
             if (fileInput.files.length === 0) return;
-            
+
             const file = fileInput.files[0];
             const formData = new FormData();
             formData.append("exercise_name", originalExerciseName);
             formData.append("index", index);
             formData.append("image", file);
-            
+
             try {
                 showToast(`Afbeelding ${index} aan het uploaden...`);
                 const res = await fetch('/api/upload', {
@@ -920,7 +977,7 @@
                     body: formData
                 });
                 const data = await res.json();
-                
+
                 if (data.error) {
                     showToast("Fout bij upload: " + data.error, "error");
                 } else {
@@ -935,12 +992,12 @@
         async function saveCurrentExercise() {
             const engName = document.getElementById('input-english-name').value.trim();
             const nlName = document.getElementById('input-dutch-name').value.trim() || engName;
-            
+
             if (!engName) {
                 showToast("Interne Engelse naam is verplicht.", "error");
                 return;
             }
-            
+
             // Get instructions
             const stepInputs = document.querySelectorAll('.instruction-step-row .input-step');
             const steps = [];
@@ -951,7 +1008,7 @@
                 }
             });
             const formInstructions = steps.join('|');
-            
+
             const payload = {
                 "ID": document.getElementById('input-card-id').value.trim(),
                 "Exercise_Name": engName,
@@ -964,7 +1021,7 @@
                 "Secondary_Muscles": document.getElementById('input-secondary-muscles').value.trim(),
                 "old_exercise_name": originalExerciseName
             };
-            
+
             try {
                 const res = await fetch('/api/exercises', {
                     method: 'POST',
@@ -972,7 +1029,7 @@
                     body: JSON.stringify(payload)
                 });
                 const result = await res.json();
-                
+
                 if (result.error) {
                     showToast("Fout bij opslaan: " + result.error, "error");
                 } else {
@@ -988,13 +1045,13 @@
         async function deleteCurrentExercise() {
             if (!originalExerciseName) return;
             if (!confirm(`Weet je zeker dat je '${originalExerciseName}' en alle bijbehorende afbeeldingen wilt verwijderen?`)) return;
-            
+
             try {
                 const res = await fetch(`/api/exercises/${encodeURIComponent(originalExerciseName)}`, {
                     method: 'DELETE'
                 });
                 const result = await res.json();
-                
+
                 if (result.error) {
                     showToast("Fout bij verwijderen: " + result.error, "error");
                 } else {
@@ -1010,14 +1067,14 @@
         async function generateAllCards() {
             const btn = document.getElementById('btn-generate');
             const text = document.getElementById('generate-btn-text');
-            
+
             btn.disabled = true;
             text.innerHTML = '<span class="spinner"></span> Genereren...';
-            
+
             try {
                 const res = await fetch('/api/generate', { method: 'POST' });
                 const data = await res.json();
-                
+
                 if (data.error) {
                     showToast("Fout bij genereren: " + data.error, "error");
                 } else {
@@ -1036,14 +1093,14 @@
             const toast = document.getElementById('toast-notify');
             toast.className = 'toast show ' + type;
             document.getElementById('toast-text').innerText = message;
-            
+
             setTimeout(() => {
                 toast.className = 'toast';
             }, 3000);
         }
 
         // Listeners
-        document.getElementById('sort-select').addEventListener('change', function() {
+        document.getElementById('sort-select').addEventListener('change', function () {
             renderList(document.getElementById('search-input').value);
         });
 
@@ -1051,4 +1108,5 @@
         fetchExercises();
     </script>
 </body>
+
 </html>

@@ -312,7 +312,9 @@ def upload_image():
 def generate_cards():
     try:
         # Import and run the generator logic from generate_cards.py
+        import importlib
         import generate_cards
+        importlib.reload(generate_cards)
         generate_cards.main()
         return jsonify({"message": "Kaarten succesvol gegenereerd!"})
     except Exception as e:
