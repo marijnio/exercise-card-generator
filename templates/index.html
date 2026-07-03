@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kettlebell Kaarten Manager</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0F172A;       /* Slate 900 */
+            --bg-sidebar: #1E293B;    /* Slate 800 */
+            --bg-card: #334155;       /* Slate 700 */
+            --border-color: #475569;  /* Slate 600 */
+            --text-main: #F8FAFC;     /* Slate 50 */
+            --text-muted: #94A3B8;    /* Slate 400 */
+            --accent-teal: #0D9488;   /* Teal 600 */
+            --accent-teal-hover: #14B8A6; /* Teal 500 */
+            --danger-red: #EF4444;    /* Red 500 */
+            --success-green: #22C55E; /* Green 500 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 380px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 14px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent-teal);
+        }
+
+        .search-sort-container {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .search-bar {
+            flex: 1.2;
+        }
+
+        .sort-select {
+            flex: 0.8;
+            padding: 10px 8px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+
+        .sort-select:focus {
+            border-color: var(--accent-teal);
+        }
+
+        .exercise-item-id {
+            background-color: rgba(13, 148, 136, 0.15);
+            color: var(--accent-teal);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(13, 148, 136, 0.3);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .exercise-item.active .exercise-item-id {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #FFF;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .exercise-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .exercise-item {
+            padding: 14px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .exercise-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .exercise-item.active {
+            background-color: var(--accent-teal);
+            transform: translateX(4px);
+        }
+
+        .exercise-item-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .exercise-item-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exercise-item.active .exercise-item-sub {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.active {
+            background-color: var(--success-green);
+        }
+
+        .status-dot.inactive {
+            background-color: var(--danger-red);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: background-color 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-teal);
+            color: #FFF;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-teal-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-red);
+            color: #FFF;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        /* Main area styling */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--bg-main);
+        }
+
+        .main-header {
+            padding: 24px 40px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .editor-form-panel {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group-full {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--accent-teal);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* Image slots styling */
+        .image-uploader-section {
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+        }
+
+        .image-slots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .image-slot {
+            background-color: var(--bg-sidebar);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .image-slot:hover {
+            border-color: var(--accent-teal);
+            background-color: rgba(13, 148, 136, 0.05);
+        }
+
+        .image-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-slot-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(15, 23, 42, 0.85);
+            padding: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border-top: 1px solid var(--border-color);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .image-slot:hover .image-slot-overlay {
+            opacity: 1;
+        }
+
+        .image-slot-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .image-slot-placeholder svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-muted);
+            fill: none;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            width: 500px;
+            background-color: var(--bg-sidebar);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 40px;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .preview-panel h3 {
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .card-preview-container {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            background-color: var(--bg-main);
+            aspect-ratio: 1.5; /* 3:2 aspect ratio */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .card-preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .card-preview-empty {
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            background-color: var(--bg-sidebar);
+            border-left: 4px solid var(--accent-teal);
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            z-index: 1000;
+            font-weight: 500;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: var(--success-green);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger-red);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border-left-color: #FFF;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Clean Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar component -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Kaarten Manager
+            </h1>
+            <div class="search-sort-container">
+                <input type="text" id="search-input" class="search-bar" placeholder="Zoek oefening...">
+                <select id="sort-select" class="sort-select">
+                    <option value="id-asc">ID (Oplopend)</option>
+                    <option value="id-desc">ID (Aflopend)</option>
+                    <option value="name-asc">Naam (A-Z)</option>
+                    <option value="name-desc">Naam (Z-A)</option>
+                </select>
+            </div>
+        </div>
+        <div class="exercise-list" id="exercise-list">
+            <!-- Dynamically populated -->
+        </div>
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary" id="btn-new-exercise" onclick="createNewExercise()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Nieuw
+            </button>
+            <button class="btn btn-primary" id="btn-generate" onclick="generateAllCards()">
+                <span id="generate-btn-text">Genereer Kaarten</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main area component -->
+    <div class="main-content">
+        <div class="main-header">
+            <h2 id="editor-title">Oefening Bewerken</h2>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-secondary" onclick="deleteCurrentExercise()" id="btn-delete" style="display:none;">Verwijder</button>
+                <button class="btn btn-primary" onclick="saveCurrentExercise()">Opslaan</button>
+            </div>
+        </div>
+
+        <div class="editor-container">
+            <!-- Form Panel -->
+            <div class="editor-form-panel">
+                <form id="exercise-form" onsubmit="event.preventDefault();">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="input-card-id">Kaart ID (bijv. 1, 01, KB-01)</label>
+                            <input type="text" id="input-card-id" placeholder="bijv. 1">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-english-name">Interne Naam (Engels - voor afbeeldingen)</label>
+                            <input type="text" id="input-english-name" placeholder="bijv. Kettlebell Swing">
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label for="input-dutch-name">Print Titel (Nederlands)</label>
+                            <input type="text" id="input-dutch-name" placeholder="bijv. Kettlebell Swing">
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label for="input-description">Overzicht Beschrijving (Nederlands)</label>
+                            <textarea id="input-description" placeholder="Voer een korte omschrijving in van de oefening en de voordelen..."></textarea>
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label>Correcte Uitvoering (Nederlands - max. 4 stappen)</label>
+                            <input type="text" id="input-instruction-1" placeholder="Stap 1" style="margin-bottom: 8px;">
+                            <input type="text" id="input-instruction-2" placeholder="Stap 2" style="margin-bottom: 8px;">
+                            <input type="text" id="input-instruction-3" placeholder="Stap 3" style="margin-bottom: 8px;">
+                            <input type="text" id="input-instruction-4" placeholder="Stap 4">
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label for="input-video-url">Video Instructie URL (Optioneel)</label>
+                            <input type="text" id="input-video-url" placeholder="https://www.youtube.com/... (Genereert QR-code op de kaart)">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-primary-muscles">Primaire Spieren (Komma gescheiden)</label>
+                            <input type="text" id="input-primary-muscles" placeholder="bijv. Hamstrings, Billen">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-secondary-muscles">Secundaire Spieren (Komma gescheiden)</label>
+                            <input type="text" id="input-secondary-muscles" placeholder="bijv. Core, Schouders, Onderrug">
+                        </div>
+                    </div>
+                </form>
+
+                <!-- File uploads hidden inputs -->
+                <input type="file" id="file-upload-1" accept="image/*" style="display: none;" onchange="handleFileSelected(1)">
+                <input type="file" id="file-upload-2" accept="image/*" style="display: none;" onchange="handleFileSelected(2)">
+
+                <!-- Image manager slots -->
+                <div class="image-uploader-section">
+                    <label>Demonstratie Afbeeldingen (1:1 vierkant aanbevolen)</label>
+                    <div class="image-slots-grid">
+                        <!-- Image 1 -->
+                        <div class="image-slot" id="image-slot-1" onclick="triggerFileUpload(1)">
+                            <div class="image-slot-placeholder" id="placeholder-1">
+                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                <div>
+                                    <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Zet Positie 1 neer</p>
+                                    <p style="font-size:12px;">Klik om te uploaden</p>
+                                </div>
+                            </div>
+                            <img id="img-preview-1" style="display:none;">
+                            <div class="image-slot-overlay">Wijzig afbeelding 1</div>
+                        </div>
+
+                        <!-- Image 2 -->
+                        <div class="image-slot" id="image-slot-2" onclick="triggerFileUpload(2)">
+                            <div class="image-slot-placeholder" id="placeholder-2">
+                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                <div>
+                                    <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Zet Positie 2 neer</p>
+                                    <p style="font-size:12px;">Klik om te uploaden</p>
+                                </div>
+                            </div>
+                            <img id="img-preview-2" style="display:none;">
+                            <div class="image-slot-overlay">Wijzig afbeelding 2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="preview-panel">
+                <h3>Kaart Live Preview</h3>
+                <div class="card-preview-container" id="card-preview-container">
+                    <div class="card-preview-empty">
+                        Geen kaart gegenereerd of geladen. Klik op 'Opslaan' en daarna op 'Genereer Kaarten' om de live kaart hier te zien.
+                    </div>
+                    <img id="card-preview-img" style="display:none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification component -->
+    <div class="toast" id="toast-notify">
+        <span id="toast-text">Bericht opgeslagen</span>
+    </div>
+
+    <script>
+        let allExercises = [];
+        let activeExercise = null;
+        let originalExerciseName = "";
+
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            renderList(e.target.value);
+        });
+
+        // Initialize dashboard
+        async function fetchExercises() {
+            try {
+                const res = await fetch('/api/exercises');
+                allExercises = await res.json();
+                renderList();
+                
+                // Keep active selected or load first
+                if (allExercises.length > 0) {
+                    if (activeExercise) {
+                        const updated = allExercises.find(ex => ex.Exercise_Name === activeExercise.Exercise_Name);
+                        if (updated) {
+                            selectExercise(updated);
+                        } else {
+                            selectExercise(allExercises[0]);
+                        }
+                    } else {
+                        selectExercise(allExercises[0]);
+                    }
+                } else {
+                    createNewExercise();
+                }
+            } catch (err) {
+                showToast("Fout bij laden van oefeningen: " + err, "error");
+            }
+        }
+
+        function renderList(filter = "") {
+            const listContainer = document.getElementById('exercise-list');
+            listContainer.innerHTML = "";
+            
+            const filtered = allExercises.filter(ex => 
+                ex.Exercise_Name.toLowerCase().includes(filter.toLowerCase()) ||
+                ex.Print_Name.toLowerCase().includes(filter.toLowerCase()) ||
+                (ex.ID && ex.ID.toLowerCase().includes(filter.toLowerCase()))
+            );
+
+            // Get sort criteria
+            const sortVal = document.getElementById('sort-select').value;
+            filtered.sort((a, b) => {
+                if (sortVal === 'id-asc' || sortVal === 'id-desc') {
+                    // Try to sort numerically if possible, otherwise string sort
+                    const aNum = parseInt(a.ID, 10);
+                    const bNum = parseInt(b.ID, 10);
+                    let comparison = 0;
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        comparison = aNum - bNum;
+                    } else {
+                        comparison = String(a.ID).localeCompare(String(b.ID));
+                    }
+                    return sortVal === 'id-asc' ? comparison : -comparison;
+                } else if (sortVal === 'name-asc' || sortVal === 'name-desc') {
+                    const comparison = a.Print_Name.localeCompare(b.Print_Name);
+                    return sortVal === 'name-asc' ? comparison : -comparison;
+                }
+                return 0;
+            });
+
+            filtered.forEach(ex => {
+                const item = document.createElement('div');
+                item.className = 'exercise-item';
+                if (activeExercise && ex.Exercise_Name === activeExercise.Exercise_Name) {
+                    item.className += ' active';
+                }
+                
+                // Indicators for images
+                const statusImg1 = ex.has_img1 ? 'active' : 'inactive';
+                const statusImg2 = ex.has_img2 ? 'active' : 'inactive';
+                
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
+                        <span class="exercise-item-id">#${ex.ID}</span>
+                        <div class="exercise-item-name" style="flex:1; text-align:left;">${ex.Print_Name}</div>
+                    </div>
+                    <div class="exercise-item-sub">
+                        <span style="font-style:italic;">${ex.Exercise_Name}</span>
+                        <span style="margin-left:auto; display:flex; gap:6px; align-items:center;">
+                            Pos 1: <span class="status-dot ${statusImg1}"></span>
+                            Pos 2: <span class="status-dot ${statusImg2}"></span>
+                        </span>
+                    </div>
+                `;
+                
+                item.onclick = () => selectExercise(ex);
+                listContainer.appendChild(item);
+            });
+        }
+
+        function selectExercise(ex) {
+            activeExercise = ex;
+            originalExerciseName = ex.Exercise_Name;
+            
+            document.getElementById('editor-title').innerText = "Oefening: " + ex.Print_Name;
+            document.getElementById('btn-delete').style.display = "inline-block";
+            
+            // Populate form
+            document.getElementById('input-card-id').value = ex.ID || "";
+            document.getElementById('input-english-name').value = ex.Exercise_Name;
+            document.getElementById('input-dutch-name').value = ex.Print_Name;
+            document.getElementById('input-description').value = ex.Description;
+            document.getElementById('input-instruction-1').value = ex.Form_Instruction_1;
+            document.getElementById('input-instruction-2').value = ex.Form_Instruction_2;
+            document.getElementById('input-instruction-3').value = ex.Form_Instruction_3;
+            document.getElementById('input-instruction-4').value = ex.Form_Instruction_4;
+            document.getElementById('input-video-url').value = ex.Video_URL;
+            document.getElementById('input-primary-muscles').value = ex.Primary_Muscles;
+            document.getElementById('input-secondary-muscles').value = ex.Secondary_Muscles;
+            
+            // Load photos previews
+            setPhotoPreview(1, ex.has_img1 ? ex.img1_path : null);
+            setPhotoPreview(2, ex.has_img2 ? ex.img2_path : null);
+            
+            // Live card preview
+            const previewContainer = document.getElementById('card-preview-container');
+            const previewImg = document.getElementById('card-preview-img');
+            
+            if (ex.card_path) {
+                // Add timestamp to prevent browser cache from holding old generated JPEGs
+                previewImg.src = ex.card_path + "?t=" + new Date().getTime();
+                previewImg.style.display = 'block';
+                if (previewContainer.querySelector('.card-preview-empty')) {
+                    previewContainer.querySelector('.card-preview-empty').style.display = 'none';
+                }
+            } else {
+                previewImg.style.display = 'none';
+                const emptyMsg = previewContainer.querySelector('.card-preview-empty');
+                if (emptyMsg) {
+                    emptyMsg.style.display = 'block';
+                }
+            }
+            
+            // Refresh selection highlighting
+            renderList(document.getElementById('search-input').value);
+        }
+
+        function createNewExercise() {
+            activeExercise = null;
+            originalExerciseName = "";
+            
+            document.getElementById('editor-title').innerText = "Nieuwe Oefening Toevoegen";
+            document.getElementById('btn-delete').style.display = "none";
+            document.getElementById('exercise-form').reset();
+            
+            // Clear slot previews
+            setPhotoPreview(1, null);
+            setPhotoPreview(2, null);
+            
+            // Clear card preview
+            const previewContainer = document.getElementById('card-preview-container');
+            const previewImg = document.getElementById('card-preview-img');
+            previewImg.style.display = 'none';
+            const emptyMsg = previewContainer.querySelector('.card-preview-empty');
+            if (emptyMsg) {
+                emptyMsg.style.display = 'block';
+            }
+            
+            // Unselect in list
+            renderList(document.getElementById('search-input').value);
+        }
+
+        function setPhotoPreview(index, path) {
+            const preview = document.getElementById(`img-preview-${index}`);
+            const placeholder = document.getElementById(`placeholder-${index}`);
+            
+            if (path) {
+                preview.src = path + "?t=" + new Date().getTime();
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+        }
+
+        // Trigger file input dialogs
+        function triggerFileUpload(index) {
+            if (!originalExerciseName) {
+                showToast("Sla eerst de oefening op voordat je afbeeldingen toevoegt.", "error");
+                return;
+            }
+            document.getElementById(`file-upload-${index}`).click();
+        }
+
+        async function handleFileSelected(index) {
+            const fileInput = document.getElementById(`file-upload-${index}`);
+            if (fileInput.files.length === 0) return;
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("exercise_name", originalExerciseName);
+            formData.append("index", index);
+            formData.append("image", file);
+            
+            try {
+                showToast(`Afbeelding ${index} aan het uploaden...`);
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if (data.error) {
+                    showToast("Fout bij upload: " + data.error, "error");
+                } else {
+                    showToast(data.message, "success");
+                    fetchExercises(); // Reload image status on layout
+                }
+            } catch (err) {
+                showToast("Upload mislukt: " + err, "error");
+            }
+        }
+
+        async function saveCurrentExercise() {
+            const engName = document.getElementById('input-english-name').value.trim();
+            const nlName = document.getElementById('input-dutch-name').value.trim() || engName;
+            
+            if (!engName) {
+                showToast("Interne Engelse naam is verplicht.", "error");
+                return;
+            }
+            
+            const payload = {
+                "ID": document.getElementById('input-card-id').value.trim(),
+                "Exercise_Name": engName,
+                "Print_Name": nlName,
+                "Description": document.getElementById('input-description').value.trim(),
+                "Form_Instruction_1": document.getElementById('input-instruction-1').value.trim(),
+                "Form_Instruction_2": document.getElementById('input-instruction-2').value.trim(),
+                "Form_Instruction_3": document.getElementById('input-instruction-3').value.trim(),
+                "Form_Instruction_4": document.getElementById('input-instruction-4').value.trim(),
+                "Video_URL": document.getElementById('input-video-url').value.trim(),
+                "Primary_Muscles": document.getElementById('input-primary-muscles').value.trim(),
+                "Secondary_Muscles": document.getElementById('input-secondary-muscles').value.trim(),
+                "old_exercise_name": originalExerciseName
+            };
+            
+            try {
+                const res = await fetch('/api/exercises', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                
+                if (result.error) {
+                    showToast("Fout bij opslaan: " + result.error, "error");
+                } else {
+                    showToast("Oefening succesvol opgeslagen!", "success");
+                    originalExerciseName = engName;
+                    await fetchExercises();
+                }
+            } catch (err) {
+                showToast("Opslaan mislukt: " + err, "error");
+            }
+        }
+
+        async function deleteCurrentExercise() {
+            if (!originalExerciseName) return;
+            if (!confirm(`Weet je zeker dat je '${originalExerciseName}' en alle bijbehorende afbeeldingen wilt verwijderen?`)) return;
+            
+            try {
+                const res = await fetch(`/api/exercises/${encodeURIComponent(originalExerciseName)}`, {
+                    method: 'DELETE'
+                });
+                const result = await res.json();
+                
+                if (result.error) {
+                    showToast("Fout bij verwijderen: " + result.error, "error");
+                } else {
+                    showToast("Oefening verwijderd.", "success");
+                    activeExercise = null;
+                    fetchExercises();
+                }
+            } catch (err) {
+                showToast("Verwijderen mislukt: " + err, "error");
+            }
+        }
+
+        async function generateAllCards() {
+            const btn = document.getElementById('btn-generate');
+            const text = document.getElementById('generate-btn-text');
+            
+            btn.disabled = true;
+            text.innerHTML = '<span class="spinner"></span> Genereren...';
+            
+            try {
+                const res = await fetch('/api/generate', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.error) {
+                    showToast("Fout bij genereren: " + data.error, "error");
+                } else {
+                    showToast("Alle kaarten succesvol gegenereerd!", "success");
+                    fetchExercises(); // Reload layout preview and updates
+                }
+            } catch (err) {
+                showToast("Genereren mislukt: " + err, "error");
+            } finally {
+                btn.disabled = false;
+                text.innerText = 'Genereer Kaarten';
+            }
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast-notify');
+            toast.className = 'toast show ' + type;
+            document.getElementById('toast-text').innerText = message;
+            
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // Listeners
+        document.getElementById('sort-select').addEventListener('change', function() {
+            renderList(document.getElementById('search-input').value);
+        });
+
+        // Start loading
+        fetchExercises();
+    </script>
+</body>
+</html>
