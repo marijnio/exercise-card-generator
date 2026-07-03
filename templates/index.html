@@ -574,6 +574,10 @@
                             <input type="text" id="input-instruction-4" placeholder="Stap 4">
                         </div>
                         <div class="form-group form-group-full">
+                            <label for="input-avoid-mistake">Veelvoorkomende Fout (Nederlands)</label>
+                            <input type="text" id="input-avoid-mistake" placeholder="bijv. Laat je knieën niet naar binnen vallen en voorkom dat je hakken loskomen.">
+                        </div>
+                        <div class="form-group form-group-full">
                             <label for="input-video-url">Video Instructie URL (Optioneel)</label>
                             <input type="text" id="input-video-url" placeholder="https://www.youtube.com/... (Genereert QR-code op de kaart)">
                         </div>
@@ -756,6 +760,7 @@
             document.getElementById('input-instruction-2').value = ex.Form_Instruction_2;
             document.getElementById('input-instruction-3').value = ex.Form_Instruction_3;
             document.getElementById('input-instruction-4').value = ex.Form_Instruction_4;
+            document.getElementById('input-avoid-mistake').value = ex.Avoid_Mistake || "";
             document.getElementById('input-video-url').value = ex.Video_URL;
             document.getElementById('input-primary-muscles').value = ex.Primary_Muscles;
             document.getElementById('input-secondary-muscles').value = ex.Secondary_Muscles;
@@ -882,6 +887,7 @@
                 "Form_Instruction_2": document.getElementById('input-instruction-2').value.trim(),
                 "Form_Instruction_3": document.getElementById('input-instruction-3').value.trim(),
                 "Form_Instruction_4": document.getElementById('input-instruction-4').value.trim(),
+                "Avoid_Mistake": document.getElementById('input-avoid-mistake').value.trim(),
                 "Video_URL": document.getElementById('input-video-url').value.trim(),
                 "Primary_Muscles": document.getElementById('input-primary-muscles').value.trim(),
                 "Secondary_Muscles": document.getElementById('input-secondary-muscles').value.trim(),

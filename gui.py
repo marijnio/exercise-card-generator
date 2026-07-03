@@ -57,7 +57,7 @@ def load_csv_data():
         "ID", "Exercise_Name", "Print_Name", "Description", 
         "Form_Instruction_1", "Form_Instruction_2", 
         "Form_Instruction_3", "Form_Instruction_4", 
-        "Video_URL", "Primary_Muscles", "Secondary_Muscles"
+        "Avoid_Mistake", "Video_URL", "Primary_Muscles", "Secondary_Muscles"
     ]
     if not os.path.exists(CSV_FILE):
         df = pd.DataFrame(columns=required_cols)
@@ -134,6 +134,7 @@ def get_exercises():
                 "Form_Instruction_2": str(row["Form_Instruction_2"]) if not pd.isna(row["Form_Instruction_2"]) else "",
                 "Form_Instruction_3": str(row["Form_Instruction_3"]) if not pd.isna(row["Form_Instruction_3"]) else "",
                 "Form_Instruction_4": str(row["Form_Instruction_4"]) if not pd.isna(row["Form_Instruction_4"]) else "",
+                "Avoid_Mistake": str(row.get("Avoid_Mistake", "")) if not pd.isna(row.get("Avoid_Mistake")) else "",
                 "Video_URL": str(row["Video_URL"]) if not pd.isna(row["Video_URL"]) else "",
                 "Primary_Muscles": str(row["Primary_Muscles"]) if not pd.isna(row["Primary_Muscles"]) else "",
                 "Secondary_Muscles": str(row["Secondary_Muscles"]) if not pd.isna(row["Secondary_Muscles"]) else "",
@@ -208,6 +209,7 @@ def add_update_exercise():
             "Form_Instruction_2": data.get("Form_Instruction_2", "").strip(),
             "Form_Instruction_3": data.get("Form_Instruction_3", "").strip(),
             "Form_Instruction_4": data.get("Form_Instruction_4", "").strip(),
+            "Avoid_Mistake": data.get("Avoid_Mistake", "").strip(),
             "Video_URL": data.get("Video_URL", "").strip(),
             "Primary_Muscles": data.get("Primary_Muscles", "").strip(),
             "Secondary_Muscles": data.get("Secondary_Muscles", "").strip()

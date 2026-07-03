@@ -368,8 +368,33 @@ def draw_card(row):
                 draw.text((SAFE_MARGIN + 55, y_offset), line, fill=COLOR_TEXT_BODY, font=cue_font)
                 y_offset += line_spacing
                 
-            y_offset += cue_gap
+            y_offset += 16 # tighter cue gap to prevent vertical overflow
             
+    # Render Common Mistake Section
+    avoid_mistake = clean_val(row.get("Avoid_Mistake"))
+    if avoid_mistake and avoid_mistake.lower() != "nan":
+        mistake_title_font = load_system_font("Arial Bold.ttf", 30)
+        COLOR_WARNING = "#E11D48" # Premium Rose/Coral Warning Color
+        
+        draw.text((SAFE_MARGIN, y_offset), "VEELVOORKOMENDE FOUT", fill=COLOR_WARNING, font=mistake_title_font)
+        y_offset += 46
+        
+        mistake_body_font = load_system_font("Arial.ttf", 28)
+        mistake_lines = wrap_text_by_pixels(avoid_mistake, mistake_body_font, cues_max_width - 24)
+        
+        line_h = 38
+        bar_height = len(mistake_lines) * line_h
+        draw.rectangle(
+            [(SAFE_MARGIN, y_offset + 4), (SAFE_MARGIN + 6, y_offset + 4 + bar_height - 8)],
+            fill=COLOR_WARNING
+        )
+        
+        for line in mistake_lines:
+            draw.text((SAFE_MARGIN + 24, y_offset), line, fill=COLOR_TEXT_BODY, font=mistake_body_font)
+            y_offset += line_h
+            
+        y_offset += 25 # spacer before muscles/QR section
+
     # Render Bottom Section: Muscles Engaged (Left side) & QR code Card (Right side)
     if prim_list or sec_list or has_qr:
         # Allocate bottom grid widths
@@ -522,6 +547,7 @@ def main():
             "Form_Instruction_2": row["form_instruction_2"],
             "Form_Instruction_3": row["form_instruction_3"],
             "Form_Instruction_4": row["form_instruction_4"],
+            "Avoid_Mistake": row["avoid_mistake"] if "avoid_mistake" in row else "",
             "Video_URL": row["video_url"],
             "Image_1_Path": row["image_1_path"] if "image_1_path" in row else "",
             "Image_2_Path": row["image_2_path"] if "image_2_path" in row else "",
