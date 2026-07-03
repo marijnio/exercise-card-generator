@@ -206,13 +206,10 @@ def draw_card(row):
     if description.lower() == "nan":
         description = ""
         
-    instructions = [
-        clean_val(row.get("Form_Instruction_1")),
-        clean_val(row.get("Form_Instruction_2")),
-        clean_val(row.get("Form_Instruction_3")),
-        clean_val(row.get("Form_Instruction_4"))
-    ]
-    instructions = [i for i in instructions if i and i.lower() != "nan"]
+    raw_instructions = clean_val(row.get("Form_Instructions"))
+    instructions = []
+    if raw_instructions:
+        instructions = [i.strip() for i in raw_instructions.split("|") if i.strip() and i.strip().lower() != "nan"]
     
     video_url = clean_val(row.get("Video_URL"))
     if video_url.lower() == "nan":
@@ -339,7 +336,7 @@ def draw_card(row):
             
         y_offset += box_height + 40 # spacer before instructions heading
         
-    # Render Form Instructions Checklist
+    # Render Form Instructions Numbered List
     if instructions:
         # Heading (30pt bold)
         inst_title_font = load_system_font("Arial Bold.ttf", 30)
@@ -348,27 +345,21 @@ def draw_card(row):
         
         # Body list (28pt regular)
         cue_font = load_system_font("Arial.ttf", 28)
+        num_font = load_system_font("Arial Bold.ttf", 28)
         line_spacing = 38
-        cue_gap = 25
         
-        for item in instructions:
-            # Draw modern checkbox [ ] as a rounded rectangle matching font height (28x28 px)
-            box_size = 28
-            box_y = y_offset + 4 # aligned vertically with 28pt text line
-            draw.rounded_rectangle(
-                [(SAFE_MARGIN, box_y), (SAFE_MARGIN + box_size, box_y + box_size)],
-                radius=6,
-                outline=COLOR_BOX_BORDER,
-                width=3
-            )
+        for idx, item in enumerate(instructions, start=1):
+            # Draw step number (e.g. "1.") in accent color and bold font
+            num_text = f"{idx}."
+            draw.text((SAFE_MARGIN, y_offset), num_text, fill=COLOR_ACCENT, font=num_font)
             
-            # Wrap and draw lines
-            item_lines = wrap_text_by_pixels(item, cue_font, cues_max_width - 55)
+            # Wrap and draw lines (indented 45px)
+            item_lines = wrap_text_by_pixels(item, cue_font, cues_max_width - 45)
             for line in item_lines:
-                draw.text((SAFE_MARGIN + 55, y_offset), line, fill=COLOR_TEXT_BODY, font=cue_font)
+                draw.text((SAFE_MARGIN + 45, y_offset), line, fill=COLOR_TEXT_BODY, font=cue_font)
                 y_offset += line_spacing
                 
-            y_offset += 16 # tighter cue gap to prevent vertical overflow
+            y_offset += 16 # gap between steps
             
     # Render Common Mistake Section
     avoid_mistake = clean_val(row.get("Avoid_Mistake"))
@@ -521,10 +512,7 @@ def main():
     required_cols = [
         "exercise_name", 
         "description", 
-        "form_instruction_1", 
-        "form_instruction_2", 
-        "form_instruction_3", 
-        "form_instruction_4", 
+        "form_instructions", 
         "video_url"
     ]
     missing = [c for c in required_cols if c not in df.columns]
@@ -543,10 +531,7 @@ def main():
             "Exercise_Name": row["exercise_name"],
             "Print_Name": row["print_name"] if "print_name" in row else row["exercise_name"],
             "Description": row["description"],
-            "Form_Instruction_1": row["form_instruction_1"],
-            "Form_Instruction_2": row["form_instruction_2"],
-            "Form_Instruction_3": row["form_instruction_3"],
-            "Form_Instruction_4": row["form_instruction_4"],
+            "Form_Instructions": row["form_instructions"],
             "Avoid_Mistake": row["avoid_mistake"] if "avoid_mistake" in row else "",
             "Video_URL": row["video_url"],
             "Image_1_Path": row["image_1_path"] if "image_1_path" in row else "",

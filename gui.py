@@ -55,9 +55,8 @@ def load_csv_data():
     """Loads CSV, ensuring required columns exist."""
     required_cols = [
         "ID", "Exercise_Name", "Print_Name", "Description", 
-        "Form_Instruction_1", "Form_Instruction_2", 
-        "Form_Instruction_3", "Form_Instruction_4", 
-        "Avoid_Mistake", "Video_URL", "Primary_Muscles", "Secondary_Muscles"
+        "Form_Instructions", "Avoid_Mistake", "Video_URL", 
+        "Primary_Muscles", "Secondary_Muscles"
     ]
     if not os.path.exists(CSV_FILE):
         df = pd.DataFrame(columns=required_cols)
@@ -68,8 +67,29 @@ def load_csv_data():
     
     # Standardize column casing
     col_mapping = {col.lower().strip(): col for col in required_cols}
+    # Add backward compatibility mapping for old columns
+    old_cols = ["Form_Instruction_1", "Form_Instruction_2", "Form_Instruction_3", "Form_Instruction_4"]
+    for oc in old_cols:
+        col_mapping[oc.lower().strip()] = oc
+    
     df.columns = [col_mapping.get(c.lower().strip(), c) for c in df.columns]
     
+    # Migrate old checklist columns if they exist and Form_Instructions is missing
+    if "Form_Instructions" not in df.columns:
+        instructions_col = []
+        for idx, row in df.iterrows():
+            steps = []
+            for oc in old_cols:
+                if oc in df.columns and not pd.isna(row[oc]):
+                    val = str(row[oc]).strip()
+                    if val:
+                        steps.append(val)
+            instructions_col.append("|".join(steps))
+        df["Form_Instructions"] = instructions_col
+        # Drop old columns
+        df = df.drop(columns=[oc for oc in old_cols if oc in df.columns])
+        df.to_csv(CSV_FILE, index=False)
+        
     # Backfill missing columns
     for col in required_cols:
         if col not in df.columns:
@@ -130,10 +150,7 @@ def get_exercises():
                 "Exercise_Name": name,
                 "Print_Name": str(row.get("Print_Name", name)) if not pd.isna(row.get("Print_Name")) else name,
                 "Description": str(row["Description"]) if not pd.isna(row["Description"]) else "",
-                "Form_Instruction_1": str(row["Form_Instruction_1"]) if not pd.isna(row["Form_Instruction_1"]) else "",
-                "Form_Instruction_2": str(row["Form_Instruction_2"]) if not pd.isna(row["Form_Instruction_2"]) else "",
-                "Form_Instruction_3": str(row["Form_Instruction_3"]) if not pd.isna(row["Form_Instruction_3"]) else "",
-                "Form_Instruction_4": str(row["Form_Instruction_4"]) if not pd.isna(row["Form_Instruction_4"]) else "",
+                "Form_Instructions": str(row["Form_Instructions"]) if not pd.isna(row["Form_Instructions"]) else "",
                 "Avoid_Mistake": str(row.get("Avoid_Mistake", "")) if not pd.isna(row.get("Avoid_Mistake")) else "",
                 "Video_URL": str(row["Video_URL"]) if not pd.isna(row["Video_URL"]) else "",
                 "Primary_Muscles": str(row["Primary_Muscles"]) if not pd.isna(row["Primary_Muscles"]) else "",
@@ -205,10 +222,7 @@ def add_update_exercise():
             "Exercise_Name": name,
             "Print_Name": data.get("Print_Name", name).strip() or name,
             "Description": data.get("Description", "").strip(),
-            "Form_Instruction_1": data.get("Form_Instruction_1", "").strip(),
-            "Form_Instruction_2": data.get("Form_Instruction_2", "").strip(),
-            "Form_Instruction_3": data.get("Form_Instruction_3", "").strip(),
-            "Form_Instruction_4": data.get("Form_Instruction_4", "").strip(),
+            "Form_Instructions": data.get("Form_Instructions", "").strip(),
             "Avoid_Mistake": data.get("Avoid_Mistake", "").strip(),
             "Video_URL": data.get("Video_URL", "").strip(),
             "Primary_Muscles": data.get("Primary_Muscles", "").strip(),

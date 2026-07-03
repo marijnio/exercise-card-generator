@@ -567,11 +567,14 @@
                             <textarea id="input-description" placeholder="Voer een korte omschrijving in van de oefening en de voordelen..."></textarea>
                         </div>
                         <div class="form-group form-group-full">
-                            <label>Correcte Uitvoering (Nederlands - max. 4 stappen)</label>
-                            <input type="text" id="input-instruction-1" placeholder="Stap 1" style="margin-bottom: 8px;">
-                            <input type="text" id="input-instruction-2" placeholder="Stap 2" style="margin-bottom: 8px;">
-                            <input type="text" id="input-instruction-3" placeholder="Stap 3" style="margin-bottom: 8px;">
-                            <input type="text" id="input-instruction-4" placeholder="Stap 4">
+                            <label>Correcte Uitvoering (Nederlands)</label>
+                            <div id="instructions-container" style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px;">
+                                <!-- Dynamic steps will be inserted here -->
+                            </div>
+                            <button class="btn btn-secondary" type="button" onclick="addInstructionStep('')" style="align-self: flex-start; padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Stap Toevoegen
+                            </button>
                         </div>
                         <div class="form-group form-group-full">
                             <label for="input-avoid-mistake">Veelvoorkomende Fout (Nederlands)</label>
@@ -756,10 +759,28 @@
             document.getElementById('input-english-name').value = ex.Exercise_Name;
             document.getElementById('input-dutch-name').value = ex.Print_Name;
             document.getElementById('input-description').value = ex.Description;
-            document.getElementById('input-instruction-1').value = ex.Form_Instruction_1;
-            document.getElementById('input-instruction-2').value = ex.Form_Instruction_2;
-            document.getElementById('input-instruction-3').value = ex.Form_Instruction_3;
-            document.getElementById('input-instruction-4').value = ex.Form_Instruction_4;
+            // Clear and populate instructions
+            const container = document.getElementById('instructions-container');
+            container.innerHTML = "";
+            if (ex.Form_Instructions) {
+                const steps = ex.Form_Instructions.split('|');
+                steps.forEach(step => {
+                    if (step.trim()) {
+                        addInstructionStep(step.trim());
+                    }
+                });
+            } else {
+                // Backward compatibility just in case
+                let old_steps = [ex.Form_Instruction_1, ex.Form_Instruction_2, ex.Form_Instruction_3, ex.Form_Instruction_4];
+                old_steps.forEach(step => {
+                    if (step && step.trim()) {
+                        addInstructionStep(step.trim());
+                    }
+                });
+            }
+            if (container.children.length === 0) {
+                addInstructionStep("");
+            }
             document.getElementById('input-avoid-mistake').value = ex.Avoid_Mistake || "";
             document.getElementById('input-video-url').value = ex.Video_URL;
             document.getElementById('input-primary-muscles').value = ex.Primary_Muscles;
@@ -792,6 +813,43 @@
             renderList(document.getElementById('search-input').value);
         }
 
+        function addInstructionStep(value = "") {
+            const container = document.getElementById('instructions-container');
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'instruction-step-row';
+            stepDiv.style.display = 'flex';
+            stepDiv.style.gap = '8px';
+            stepDiv.style.alignItems = 'center';
+            
+            stepDiv.innerHTML = `
+                <span class="step-number" style="font-weight:600; color:var(--accent-teal); font-size:14px; min-width:20px;"></span>
+                <input type="text" class="input-step" placeholder="Voer instructiestap in..." value="${value.replace(/"/g, '&quot;')}" style="flex:1;">
+                <button type="button" class="btn btn-danger-icon" onclick="removeInstructionStep(this)" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:4px 8px; display:flex; align-items:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+            `;
+            
+            container.appendChild(stepDiv);
+            updateStepNumbers();
+        }
+
+        function removeInstructionStep(btn) {
+            const container = document.getElementById('instructions-container');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+                updateStepNumbers();
+            } else {
+                btn.parentElement.querySelector('.input-step').value = "";
+            }
+        }
+
+        function updateStepNumbers() {
+            const rows = document.querySelectorAll('.instruction-step-row');
+            rows.forEach((row, index) => {
+                row.querySelector('.step-number').innerText = (index + 1) + ".";
+            });
+        }
+
         function createNewExercise() {
             activeExercise = null;
             originalExerciseName = "";
@@ -799,6 +857,11 @@
             document.getElementById('editor-title').innerText = "Nieuwe Oefening Toevoegen";
             document.getElementById('btn-delete').style.display = "none";
             document.getElementById('exercise-form').reset();
+            
+            // Clear and add one empty instruction step
+            const container = document.getElementById('instructions-container');
+            container.innerHTML = "";
+            addInstructionStep("");
             
             // Clear slot previews
             setPhotoPreview(1, null);
@@ -878,15 +941,23 @@
                 return;
             }
             
+            // Get instructions
+            const stepInputs = document.querySelectorAll('.instruction-step-row .input-step');
+            const steps = [];
+            stepInputs.forEach(input => {
+                const val = input.value.trim();
+                if (val) {
+                    steps.push(val);
+                }
+            });
+            const formInstructions = steps.join('|');
+            
             const payload = {
                 "ID": document.getElementById('input-card-id').value.trim(),
                 "Exercise_Name": engName,
                 "Print_Name": nlName,
                 "Description": document.getElementById('input-description').value.trim(),
-                "Form_Instruction_1": document.getElementById('input-instruction-1').value.trim(),
-                "Form_Instruction_2": document.getElementById('input-instruction-2').value.trim(),
-                "Form_Instruction_3": document.getElementById('input-instruction-3').value.trim(),
-                "Form_Instruction_4": document.getElementById('input-instruction-4').value.trim(),
+                "Form_Instructions": formInstructions,
                 "Avoid_Mistake": document.getElementById('input-avoid-mistake').value.trim(),
                 "Video_URL": document.getElementById('input-video-url').value.trim(),
                 "Primary_Muscles": document.getElementById('input-primary-muscles').value.trim(),
