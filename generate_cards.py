@@ -568,6 +568,48 @@ def main():
         draw_card(mapped_row)
         
     print("\nAll cards generated successfully in './print_ready_cards/'")
+    
+    # Auto-bundle all cards into a single PDF
+    bundle_cards_to_pdf()
+
+def bundle_cards_to_pdf(pdf_filename="kettlebell_kaarten.pdf"):
+    """Bundles all generated JPEG cards in the output directory into a single PDF file."""
+    if not os.path.exists(OUTPUT_DIR):
+        print(f"Error: Output directory '{OUTPUT_DIR}' does not exist.")
+        return None
+        
+    # Get all .jpg files in the directory
+    jpg_files = [f for f in os.listdir(OUTPUT_DIR) if f.endswith(".jpg")]
+    if not jpg_files:
+        print("No JPEG cards found to bundle.")
+        return None
+        
+    # Sort files alphabetically so they are ordered consistently in the PDF
+    jpg_files.sort()
+    
+    images = []
+    for f in jpg_files:
+        path = os.path.join(OUTPUT_DIR, f)
+        try:
+            # Open image and convert to RGB (PDF format requires RGB)
+            img = Image.open(path).convert("RGB")
+            images.append(img)
+        except Exception as e:
+            print(f"Failed to open image {path} for PDF bundling: {e}")
+            
+    if not images:
+        print("No valid images opened for PDF bundling.")
+        return None
+        
+    pdf_path = os.path.join(OUTPUT_DIR, pdf_filename)
+    try:
+        # Save as a single multi-page PDF
+        images[0].save(pdf_path, "PDF", resolution=300.0, save_all=True, append_images=images[1:])
+        print(f"Successfully bundled all cards into: {pdf_path}")
+        return pdf_path
+    except Exception as e:
+        print(f"Failed to save PDF: {e}")
+        return None
 
 if __name__ == "__main__":
     main()

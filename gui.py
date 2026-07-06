@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import webbrowser
 import pandas as pd
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__, template_folder="templates")
@@ -143,6 +143,43 @@ def serve_print_card(filename):
 @app.route("/misc/<path:filename>")
 def serve_misc(filename):
     return send_from_directory("misc", filename)
+
+# API: Bundle PDF
+@app.route("/api/bundle_pdf", methods=["POST"])
+def bundle_pdf():
+    try:
+        import generate_cards
+        import importlib
+        importlib.reload(generate_cards)
+        
+        # 1. Regenerate all cards to ensure they are up to date
+        generate_cards.main()
+        
+        # 2. Bundle cards into a PDF file
+        pdf_path = generate_cards.bundle_cards_to_pdf()
+        if pdf_path:
+            return jsonify({"pdf_path": f"/print_ready_cards/kettlebell_kaarten.pdf"})
+        else:
+            return jsonify({"error": "Fout bij het bundelen van de PDF."}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# API: Download PDF Bundle
+@app.route("/api/download_pdf", methods=["GET"])
+def download_pdf():
+    try:
+        pdf_path = os.path.join(PRINT_DIR, "kettlebell_kaarten.pdf")
+        if os.path.exists(pdf_path):
+            return send_file(
+                pdf_path,
+                mimetype="application/pdf",
+                as_attachment=True,
+                download_name="kettlebell_kaarten.pdf"
+            )
+        else:
+            return "PDF bestand niet gevonden.", 404
+    except Exception as e:
+        return str(e), 500
 
 # API: Get all exercises
 @app.route("/api/exercises", methods=["GET"])

@@ -670,16 +670,28 @@
         <div class="exercise-list" id="exercise-list">
             <!-- Dynamically populated -->
         </div>
-        <div class="sidebar-footer">
-            <button class="btn btn-secondary" id="btn-new-exercise" onclick="createNewExercise()">
+        <div class="sidebar-footer" style="flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 12px; width: 100%;">
+                <button class="btn btn-secondary" id="btn-new-exercise" onclick="createNewExercise()" style="flex: 1;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Nieuw
+                </button>
+                <button class="btn btn-primary" id="btn-generate" onclick="generateAllCards()" style="flex: 1.5;">
+                    <span id="generate-btn-text">Genereer Kaarten</span>
+                </button>
+            </div>
+            <button class="btn btn-secondary" id="btn-download-pdf" onclick="downloadPdfBundle()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
-                Nieuw
-            </button>
-            <button class="btn btn-primary" id="btn-generate" onclick="generateAllCards()">
-                <span id="generate-btn-text">Genereer Kaarten</span>
+                Download PDF Bundel
             </button>
         </div>
     </div>
@@ -1202,6 +1214,33 @@
             } finally {
                 btn.disabled = false;
                 text.innerText = 'Genereer Kaarten';
+            }
+        }
+
+        async function downloadPdfBundle() {
+            const btn = document.getElementById('btn-download-pdf');
+            const originalContent = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Bezig...';
+
+            try {
+                showToast("PDF bundel aanmaken...", "info");
+                const res = await fetch('/api/bundle_pdf', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.error) {
+                    showToast("Fout: " + data.error, "error");
+                } else {
+                    showToast("PDF succesvol aangemaakt!", "success");
+                    // Trigger download via the dedicated download endpoint
+                    window.location.href = '/api/download_pdf';
+                }
+            } catch (err) {
+                showToast("Netwerkfout bij aanmaken PDF: " + err, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
             }
         }
 
