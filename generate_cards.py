@@ -166,15 +166,15 @@ def find_exercise_image(base_name, index, search_dir="exercise_images"):
 
 def draw_muscle_badges(draw, label, muscles, x_start, y_offset, bg_color, text_color, max_width):
     """Draws a label followed by rounded capsule badges for each muscle in the list, with wrapping."""
-    label_font = load_system_font("Arial Bold.ttf", 22)
-    badge_font = load_system_font("Arial Bold.ttf", 20)
+    label_font = load_system_font("Arial Bold.ttf", 24)
+    badge_font = load_system_font("Arial Bold.ttf", 22)
     
     # Draw Row Label
-    draw.text((x_start, y_offset + 5), label, fill=COLOR_TEXT_MUTED, font=label_font)
+    draw.text((x_start, y_offset + 4), label, fill=COLOR_TEXT_MUTED, font=label_font)
     
     # Starting coordinate for badges
-    badge_x = x_start + 160
-    badge_height = 34
+    badge_x = x_start + 180
+    badge_height = 38
     
     for muscle in muscles:
         muscle = muscle.strip()
@@ -186,8 +186,8 @@ def draw_muscle_badges(draw, label, muscles, x_start, y_offset, bg_color, text_c
         
         # Check if badge exceeds column bounds, wrap if it does
         if badge_x + badge_width > x_start + max_width:
-            y_offset += 42
-            badge_x = x_start + 160
+            y_offset += 48
+            badge_x = x_start + 180
             
         box_coords = [(badge_x, y_offset), (badge_x + badge_width, y_offset + badge_height)]
         
@@ -195,7 +195,7 @@ def draw_muscle_badges(draw, label, muscles, x_start, y_offset, bg_color, text_c
         draw.rounded_rectangle(box_coords, radius=8, fill=bg_color)
         
         # Draw text centered in the badge
-        draw.text((badge_x + 12, y_offset + 5), muscle, fill=text_color, font=badge_font)
+        draw.text((badge_x + 12, y_offset + 4), muscle, fill=text_color, font=badge_font)
         
         badge_x += badge_width + 12
         
@@ -266,10 +266,12 @@ def draw_card(row):
     draw = ImageDraw.Draw(img)
     
     # 2. Render Header Title (Exercise Name)
+    has_qr = bool(video_url)
+    title_x = 180
+    title_max_width = IMAGE_WIDTH - SAFE_MARGIN - title_x # 1800 - 50 - 180 = 1570px
+    
     font_size = 72
     title_font = load_system_font("Arial Black.ttf", font_size)
-    
-    title_max_width = USABLE_WIDTH
     
     while font_size > 24:
         title_width = get_text_width(print_name, title_font)
@@ -278,9 +280,25 @@ def draw_card(row):
         font_size -= 2
         title_font = load_system_font("Arial Black.ttf", font_size)
         
-    # Draw Title
+    # Draw Title (shifted right to make room for the hole punch guide)
     title_y = SAFE_MARGIN
-    draw.text((SAFE_MARGIN, title_y), print_name, fill=COLOR_PRIMARY, font=title_font)
+    draw.text((title_x, title_y), print_name, fill=COLOR_PRIMARY, font=title_font)
+    
+    # Draw faint punch hole guide in the top-left corner (centered at x=90, y=95, diameter=30px)
+    hole_center_x = 90
+    hole_center_y = 95
+    hole_radius = 15
+    draw.ellipse(
+        [(hole_center_x - hole_radius, hole_center_y - hole_radius), 
+         (hole_center_x + hole_radius, hole_center_y + hole_radius)],
+        outline="#CBD5E1", # Slate 300 (faint gray)
+        width=2
+    )
+    # Add a tiny center dot (crosshair style)
+    draw.ellipse(
+        [(hole_center_x - 2, hole_center_y - 2), (hole_center_x + 2, hole_center_y + 2)],
+        fill="#CBD5E1"
+    )
     
     # 3. Draw Divider line (4px thick, Teal accent, spanning usable width)
     divider_y = 180
@@ -297,23 +315,18 @@ def draw_card(row):
         cues_max_width = USABLE_WIDTH # 1700px usable width
         
     # 5. Render Description and Instructions dynamically
-    y_offset = 230
+    y_offset = 220
     
     # Render Description Section inside a styled Slate Card
     if description:
-        # Heading (26pt bold)
-        desc_title_font = load_system_font("Arial Bold.ttf", 26)
-        draw.text((SAFE_MARGIN, y_offset), "OVERZICHT", fill=COLOR_ACCENT, font=desc_title_font)
-        y_offset += 36
-        
         # Wrap Description Body text
-        desc_body_font = load_system_font("Arial Italic.ttf", 24)
+        desc_body_font = load_system_font("Arial Italic.ttf", 28)
         # Indent text slightly inside the card container (padding = 24px)
         desc_lines = wrap_text_by_pixels(description, desc_body_font, cues_max_width - 48)
         
         # Calculate Card dimensions
         padding = 24
-        line_h = 32
+        line_h = 38
         box_height = padding * 2 + len(desc_lines) * line_h
         box_coords = [(SAFE_MARGIN, y_offset), (SAFE_MARGIN + cues_max_width, y_offset + box_height)]
         
@@ -326,100 +339,97 @@ def draw_card(row):
             draw.text((SAFE_MARGIN + padding, text_y), line, fill=COLOR_TEXT_BODY, font=desc_body_font)
             text_y += line_h
             
-        y_offset += box_height + 50 # spacer before instructions heading
+        y_offset += box_height + 40 # spacer before instructions list
         
     # Render Form Instructions Numbered List
     if instructions:
-        # Heading (26pt bold)
-        inst_title_font = load_system_font("Arial Bold.ttf", 26)
-        draw.text((SAFE_MARGIN, y_offset), "CORRECTE UITVOERING", fill=COLOR_ACCENT, font=inst_title_font)
-        y_offset += 42
-        
-        # Body list (24pt regular)
-        cue_font = load_system_font("Arial.ttf", 24)
-        num_font = load_system_font("Arial Bold.ttf", 24)
-        line_spacing = 32
+        # Body list (28pt regular)
+        cue_font = load_system_font("Arial.ttf", 28)
+        num_font = load_system_font("Arial Bold.ttf", 28)
+        line_spacing = 38
         
         for idx, item in enumerate(instructions, start=1):
             # Draw step number (e.g. "1.") in accent color and bold font
             num_text = f"{idx}."
             draw.text((SAFE_MARGIN, y_offset), num_text, fill=COLOR_ACCENT, font=num_font)
             
-            # Wrap and draw lines (indented 45px)
-            item_lines = wrap_text_by_pixels(item, cue_font, cues_max_width - 45)
+            # Wrap and draw lines (indented 60px)
+            item_lines = wrap_text_by_pixels(item, cue_font, cues_max_width - 60)
             for line in item_lines:
-                draw.text((SAFE_MARGIN + 45, y_offset), line, fill=COLOR_TEXT_BODY, font=cue_font)
+                draw.text((SAFE_MARGIN + 60, y_offset), line, fill=COLOR_TEXT_BODY, font=cue_font)
                 y_offset += line_spacing
                 
-            y_offset += 10 # gap between steps
+            y_offset += 16 # gap between steps
             
-        y_offset += 25 # additional spacer after instructions list
+        y_offset += 20 # additional spacer after instructions list
             
-    # Render Common Mistake Section
+    # Render Bottom Area (Mistake, Muscles & QR Code side-by-side)
     avoid_mistake = clean_val(row.get("Avoid_Mistake"))
-    if avoid_mistake and avoid_mistake.lower() != "nan":
-        # Heading (26pt bold)
-        mistake_title_font = load_system_font("Arial Bold.ttf", 26)
-        COLOR_WARNING = "#E11D48" # Premium Rose/Coral Warning Color
+    if avoid_mistake and avoid_mistake.lower() == "nan":
+        avoid_mistake = ""
         
-        draw.text((SAFE_MARGIN, y_offset), "VEELVOORKOMENDE FOUT", fill=COLOR_ACCENT, font=mistake_title_font)
-        y_offset += 36
+    if avoid_mistake or prim_list or sec_list or has_qr:
+        # Anchor the bottom area to start at y = 810 to align with the bottom of the card,
+        # but let it push down dynamically if instructions are very long
+        y_start = max(y_offset + 20, 740)
         
-        # Body (24pt regular)
-        mistake_body_font = load_system_font("Arial.ttf", 24)
-        mistake_lines = wrap_text_by_pixels(avoid_mistake, mistake_body_font, cues_max_width - 24)
+        # Determine columns
+        qr_card_w = 280
+        qr_card_h = 320
+        qr_card_x = SAFE_MARGIN + cues_max_width - qr_card_w # 50 + 1040 - 280 = 810px
+        qr_card_y = y_start
         
-        line_h = 32
-        bar_height = len(mistake_lines) * line_h
-        draw.rectangle(
-            [(SAFE_MARGIN, y_offset + 4), (SAFE_MARGIN + 6, y_offset + 4 + bar_height - 8)],
-            fill=COLOR_ACCENT
-        )
+        # Left columns width for mistake and muscles:
+        bottom_left_max_width = cues_max_width - qr_card_w - 40 # 1040 - 280 - 40 = 720px
         
-        for line in mistake_lines:
-            draw.text((SAFE_MARGIN + 24, y_offset), line, fill=COLOR_TEXT_BODY, font=mistake_body_font)
-            y_offset += line_h
+        # Draw on the left side:
+        left_y = y_start
+        
+        # 1. Common Mistake Section
+        if avoid_mistake:
+            regular_font = load_system_font("Arial.ttf", 28)
+            bold_font = load_system_font("Arial Bold.ttf", 28)
             
-        y_offset += 30 # spacer before muscles/QR section
-
-    # Render Bottom Section: Muscles Engaged (Left side) & QR code Card (Right side)
-    if prim_list or sec_list or has_qr:
-        # Allocate bottom grid widths
-        if has_images:
-            muscles_max_width = 540
-            qr_card_x = SAFE_MARGIN + 580 # 630px
-            qr_card_w = 460
-        else:
-            muscles_max_width = 1180
-            qr_card_x = SAFE_MARGIN + 1240 # 1290px
-            qr_card_w = 460
+            full_mistake_text = f"Let op: {avoid_mistake}"
+            mistake_lines = wrap_text_by_pixels(full_mistake_text, regular_font, bottom_left_max_width)
             
-        # Draw Muscles Engaged Heading & Badges
+            line_h = 38
+            for idx, line in enumerate(mistake_lines):
+                if idx == 0 and line.startswith("Let op: "):
+                    # Draw "Let op: " in bold
+                    prefix = "Let op: "
+                    suffix = line[len(prefix):]
+                    draw.text((SAFE_MARGIN, left_y), prefix, fill=COLOR_TEXT_BODY, font=bold_font)
+                    
+                    bold_w = get_text_width(prefix, bold_font)
+                    draw.text((SAFE_MARGIN + bold_w, left_y), suffix, fill=COLOR_TEXT_BODY, font=regular_font)
+                else:
+                    draw.text((SAFE_MARGIN, left_y), line, fill=COLOR_TEXT_BODY, font=regular_font)
+                left_y += line_h
+                
+            left_y += 25 # spacer before muscles
+            
+        # 2. Muscles Engaged Section
         if prim_list or sec_list:
-            y_offset += 15
-            muscles_y = y_offset
             muscles_title_font = load_system_font("Arial Bold.ttf", 30)
-            draw.text((SAFE_MARGIN, muscles_y), "BETROKKEN SPIEREN", fill=COLOR_ACCENT, font=muscles_title_font)
+            draw.text((SAFE_MARGIN, left_y), "BETROKKEN SPIEREN", fill=COLOR_ACCENT, font=muscles_title_font)
             
-            badge_y = muscles_y + 40
+            badge_y = left_y + 45
             if prim_list:
                 badge_y = draw_muscle_badges(
                     draw, "PRIMAIR", prim_list, SAFE_MARGIN, badge_y,
-                    bg_color="#CCFBF1", text_color="#0F766E", max_width=muscles_max_width
+                    bg_color="#CCFBF1", text_color="#0F766E", max_width=bottom_left_max_width
                 )
-                badge_y += 42
+                badge_y += 48
                 
             if sec_list:
                 badge_y = draw_muscle_badges(
                     draw, "SECUNDAIR", sec_list, SAFE_MARGIN, badge_y,
-                    bg_color="#F1F5F9", text_color="#475569", max_width=muscles_max_width
+                    bg_color="#F1F5F9", text_color="#475569", max_width=bottom_left_max_width
                 )
                 
-        # Draw QR Code Card (aligned vertically with muscles section heading)
+        # Draw QR Code Card (on the right of the bottom area)
         if has_qr:
-            qr_card_y = y_offset
-            qr_card_h = 160
-            
             # Draw QR Card Container
             draw.rounded_rectangle(
                 [(qr_card_x, qr_card_y), (qr_card_x + qr_card_w, qr_card_y + qr_card_h)],
@@ -429,26 +439,25 @@ def draw_card(row):
                 width=2
             )
             
-            # Generate and paste QR code (120x120px)
-            qr_inset_size = 120
+            # Generate and paste QR code (240x240px for maximum readability)
+            qr_inset_size = 240
             qr_img = generate_qr_code(video_url, size=qr_inset_size)
-            img.paste(qr_img, (qr_card_x + 20, qr_card_y + 20))
+            qr_x = qr_card_x + (qr_card_w - qr_inset_size) // 2 # Centered horizontally (qr_card_x + 20)
+            img.paste(qr_img, (qr_x, qr_card_y + 20))
             
             # Tiny border around the QR stamp
             draw.rectangle(
-                [(qr_card_x + 19, qr_card_y + 19), (qr_card_x + 20 + qr_inset_size, qr_card_y + 20 + qr_inset_size)],
+                [(qr_x - 1, qr_card_y + 19), (qr_x + qr_inset_size, qr_card_y + 20 + qr_inset_size)],
                 outline=COLOR_CARD_BORDER,
                 width=1
             )
             
-            # Labels inside QR Card
+            # Label below QR Card (centered horizontally)
             scan_title_font = load_system_font("Arial Bold.ttf", 20)
-            scan_sub_font = load_system_font("Arial.ttf", 16)
-            
-            text_x = qr_card_x + 20 + qr_inset_size + 20
-            draw.text((text_x, qr_card_y + 40), "SCAN VOOR VIDEO", fill=COLOR_PRIMARY, font=scan_title_font)
-            draw.text((text_x, qr_card_y + 75), "Bekijk uitvoering", fill=COLOR_TEXT_MUTED, font=scan_sub_font)
-            draw.text((text_x, qr_card_y + 98), "instructievideo", fill=COLOR_TEXT_MUTED, font=scan_sub_font)
+            label_text = "SCAN VOOR VIDEO"
+            label_w = get_text_width(label_text, scan_title_font)
+            label_x = qr_card_x + (qr_card_w - label_w) // 2
+            draw.text((label_x, qr_card_y + 20 + qr_inset_size + 15), label_text, fill=COLOR_PRIMARY, font=scan_title_font)
 
     # 9. Render Stacked Demonstration Images (with rounded corners and rounded outlines)
     if has_images:
