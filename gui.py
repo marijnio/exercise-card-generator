@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__, template_folder="templates")
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 CSV_FILE = "workout_data.csv"
 IMAGE_DIR = "exercise_images"
@@ -120,6 +121,13 @@ def load_csv_data():
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # Serve uploaded exercise images
 @app.route("/exercise_images/<path:filename>")

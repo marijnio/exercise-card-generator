@@ -251,9 +251,9 @@ def draw_card(row):
     if secondary_muscles.lower() == "nan":
         secondary_muscles = ""
         
-    # Load and crop exercise images with a wider 4:3 aspect ratio, taking up more vertical space
-    img1 = load_and_crop_image(img1_path, target_width=560, target_height=420)
-    img2 = load_and_crop_image(img2_path, target_width=560, target_height=420)
+    # Load and crop exercise images, balancing dimensions
+    img1 = load_and_crop_image(img1_path, target_width=610, target_height=430)
+    img2 = load_and_crop_image(img2_path, target_width=610, target_height=430)
     has_images = img1 is not None or img2 is not None
     has_qr = bool(video_url)
     
@@ -261,32 +261,16 @@ def draw_card(row):
     prim_list = [m.strip() for m in primary_muscles.split(",") if m.strip()]
     sec_list = [m.strip() for m in secondary_muscles.split(",") if m.strip()]
     
-    card_id = clean_val(row.get("ID"))
-    id_display = ""
-    if card_id:
-        if card_id.isdigit():
-            id_display = f"#{int(card_id):02d}"
-        else:
-            id_display = card_id
-
     # 1. Initialize canvas
     img = Image.new("RGB", (IMAGE_WIDTH, IMAGE_HEIGHT), color=COLOR_BG)
     draw = ImageDraw.Draw(img)
     
-    # 2. Render Header Title (Exercise Name) & ID
+    # 2. Render Header Title (Exercise Name)
     font_size = 72
     title_font = load_system_font("Arial Black.ttf", font_size)
     
     title_max_width = USABLE_WIDTH
-    id_font = None
-    id_w = 0
-    id_h = 0
-    if id_display:
-        id_font = load_system_font("Arial Bold.ttf", 44)
-        id_w = get_text_width(id_display, id_font)
-        id_h = get_text_height(id_display, id_font)
-        title_max_width = USABLE_WIDTH - id_w - 40 # 40px gap between title and ID
-        
+    
     while font_size > 24:
         title_width = get_text_width(print_name, title_font)
         if title_width <= title_max_width:
@@ -298,13 +282,6 @@ def draw_card(row):
     title_y = SAFE_MARGIN
     draw.text((SAFE_MARGIN, title_y), print_name, fill=COLOR_PRIMARY, font=title_font)
     
-    # Draw ID right-aligned if present
-    if id_display and id_font:
-        id_x = IMAGE_WIDTH - SAFE_MARGIN - id_w
-        # Center vertically with respect to the title area (from y=50 to y=180, mid point is 115)
-        id_y = 115 - id_h // 2
-        draw.text((id_x, id_y), id_display, fill=COLOR_ACCENT, font=id_font)
-    
     # 3. Draw Divider line (4px thick, Teal accent, spanning usable width)
     divider_y = 180
     draw.rectangle(
@@ -314,8 +291,8 @@ def draw_card(row):
     
     # 4. Determine Text wrapping column width
     if has_images:
-        # Left column is constrained to leave a 50px gap before Column 2 (which starts at x=1190)
-        cues_max_width = 1190 - SAFE_MARGIN - 50 # 1090px usable width
+        # Left column is constrained to leave a 50px gap before Column 2 (which starts at x=1140)
+        cues_max_width = 1140 - SAFE_MARGIN - 50 # 1040px usable width
     else:
         cues_max_width = USABLE_WIDTH # 1700px usable width
         
@@ -324,20 +301,20 @@ def draw_card(row):
     
     # Render Description Section inside a styled Slate Card
     if description:
-        # Heading (30pt bold)
-        desc_title_font = load_system_font("Arial Bold.ttf", 30)
+        # Heading (26pt bold)
+        desc_title_font = load_system_font("Arial Bold.ttf", 26)
         draw.text((SAFE_MARGIN, y_offset), "OVERZICHT", fill=COLOR_ACCENT, font=desc_title_font)
-        y_offset += 46
+        y_offset += 36
         
         # Wrap Description Body text
-        desc_body_font = load_system_font("Arial Italic.ttf", 28)
+        desc_body_font = load_system_font("Arial Italic.ttf", 24)
         # Indent text slightly inside the card container (padding = 24px)
         desc_lines = wrap_text_by_pixels(description, desc_body_font, cues_max_width - 48)
         
         # Calculate Card dimensions
         padding = 24
-        line_h = 38
-        box_height = padding * 2 + len(desc_lines) * line_h - 4
+        line_h = 32
+        box_height = padding * 2 + len(desc_lines) * line_h
         box_coords = [(SAFE_MARGIN, y_offset), (SAFE_MARGIN + cues_max_width, y_offset + box_height)]
         
         # Draw background and border
@@ -349,19 +326,19 @@ def draw_card(row):
             draw.text((SAFE_MARGIN + padding, text_y), line, fill=COLOR_TEXT_BODY, font=desc_body_font)
             text_y += line_h
             
-        y_offset += box_height + 40 # spacer before instructions heading
+        y_offset += box_height + 50 # spacer before instructions heading
         
     # Render Form Instructions Numbered List
     if instructions:
-        # Heading (30pt bold)
-        inst_title_font = load_system_font("Arial Bold.ttf", 30)
+        # Heading (26pt bold)
+        inst_title_font = load_system_font("Arial Bold.ttf", 26)
         draw.text((SAFE_MARGIN, y_offset), "CORRECTE UITVOERING", fill=COLOR_ACCENT, font=inst_title_font)
-        y_offset += 58
+        y_offset += 42
         
-        # Body list (28pt regular)
-        cue_font = load_system_font("Arial.ttf", 28)
-        num_font = load_system_font("Arial Bold.ttf", 28)
-        line_spacing = 38
+        # Body list (24pt regular)
+        cue_font = load_system_font("Arial.ttf", 24)
+        num_font = load_system_font("Arial Bold.ttf", 24)
+        line_spacing = 32
         
         for idx, item in enumerate(instructions, start=1):
             # Draw step number (e.g. "1.") in accent color and bold font
@@ -374,21 +351,25 @@ def draw_card(row):
                 draw.text((SAFE_MARGIN + 45, y_offset), line, fill=COLOR_TEXT_BODY, font=cue_font)
                 y_offset += line_spacing
                 
-            y_offset += 16 # gap between steps
+            y_offset += 10 # gap between steps
+            
+        y_offset += 25 # additional spacer after instructions list
             
     # Render Common Mistake Section
     avoid_mistake = clean_val(row.get("Avoid_Mistake"))
     if avoid_mistake and avoid_mistake.lower() != "nan":
-        mistake_title_font = load_system_font("Arial Bold.ttf", 30)
+        # Heading (26pt bold)
+        mistake_title_font = load_system_font("Arial Bold.ttf", 26)
         COLOR_WARNING = "#E11D48" # Premium Rose/Coral Warning Color
         
         draw.text((SAFE_MARGIN, y_offset), "VEELVOORKOMENDE FOUT", fill=COLOR_ACCENT, font=mistake_title_font)
-        y_offset += 46
+        y_offset += 36
         
-        mistake_body_font = load_system_font("Arial.ttf", 28)
+        # Body (24pt regular)
+        mistake_body_font = load_system_font("Arial.ttf", 24)
         mistake_lines = wrap_text_by_pixels(avoid_mistake, mistake_body_font, cues_max_width - 24)
         
-        line_h = 38
+        line_h = 32
         bar_height = len(mistake_lines) * line_h
         draw.rectangle(
             [(SAFE_MARGIN, y_offset + 4), (SAFE_MARGIN + 6, y_offset + 4 + bar_height - 8)],
@@ -399,14 +380,14 @@ def draw_card(row):
             draw.text((SAFE_MARGIN + 24, y_offset), line, fill=COLOR_TEXT_BODY, font=mistake_body_font)
             y_offset += line_h
             
-        y_offset += 25 # spacer before muscles/QR section
+        y_offset += 30 # spacer before muscles/QR section
 
     # Render Bottom Section: Muscles Engaged (Left side) & QR code Card (Right side)
     if prim_list or sec_list or has_qr:
         # Allocate bottom grid widths
         if has_images:
-            muscles_max_width = 590
-            qr_card_x = SAFE_MARGIN + 630 # 680px
+            muscles_max_width = 540
+            qr_card_x = SAFE_MARGIN + 580 # 630px
             qr_card_w = 460
         else:
             muscles_max_width = 1180
@@ -471,9 +452,9 @@ def draw_card(row):
 
     # 9. Render Stacked Demonstration Images (with rounded corners and rounded outlines)
     if has_images:
-        img_x = 1190
-        img_w = 560
-        img_h = 420
+        img_x = 1140
+        img_w = 610
+        img_h = 430
         mask = create_rounded_mask((img_w, img_h), radius=16)
         
         # Image 1 (POSITION 1)
@@ -489,7 +470,7 @@ def draw_card(row):
             
         # Image 2 (POSITION 2)
         if img2:
-            img_y2 = 700
+            img_y2 = 710
             img.paste(img2, (img_x, img_y2), mask=mask)
             draw.rounded_rectangle(
                 [(img_x - 1, img_y2 - 1), (img_x + img_w, img_y2 + img_h)],
@@ -504,7 +485,7 @@ def draw_card(row):
     filename = f"{sanitized_name}.jpg"
     filepath = os.path.join(OUTPUT_DIR, filename)
     
-    img.save(filepath, "JPEG", quality=95)
+    img.save(filepath, "JPEG", quality=95, dpi=(300, 300))
     print(f"Generated card: {filepath} (Dimensions: {img.size[0]}x{img.size[1]})")
 
 def main():
