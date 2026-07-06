@@ -139,6 +139,11 @@ def serve_exercise_image(filename):
 def serve_print_card(filename):
     return send_from_directory(PRINT_DIR, filename)
 
+# Serve misc assets (e.g. brand logo)
+@app.route("/misc/<path:filename>")
+def serve_misc(filename):
+    return send_from_directory("misc", filename)
+
 # API: Get all exercises
 @app.route("/api/exercises", methods=["GET"])
 def get_exercises():

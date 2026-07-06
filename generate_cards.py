@@ -8,11 +8,11 @@ import qrcode
 # Color Palette Definitions (Premium Fitness Theme)
 COLOR_BG = "#FAFAFA"          # Solid crisp light off-white
 COLOR_PRIMARY = "#1E293B"     # Dark slate/charcoal for title and headers
-COLOR_ACCENT = "#0D9488"      # Teal 600 accent color
+COLOR_ACCENT = "#FF7257"      # Cat orange accent color
 COLOR_CARD_BG = "#F8FAFC"     # Slate 50 background
 COLOR_CARD_BORDER = "#E2E8F0" # Slate 200 border for photos & QR
 COLOR_TEXT_MUTED = "#64748B"  # Slate 500 for secondary labels
-COLOR_BOX_BORDER = "#0D9488"  # Teal border for checkboxes
+COLOR_BOX_BORDER = "#FF7257"  # Cat orange border for checkboxes
 COLOR_TEXT_BODY = "#334155"   # Slate 700 for body text/cues
 
 # Output Specs
@@ -300,6 +300,26 @@ def draw_card(row):
         fill="#CBD5E1"
     )
     
+    # Draw Logo (Top Right)
+    logo_path = "misc/cat.png"
+    if os.path.exists(logo_path):
+        try:
+            with Image.open(logo_path) as logo_img:
+                logo_img = logo_img.convert("RGBA")
+                # Scale logo to height 120px
+                logo_h = 120
+                logo_w = int(logo_h * (logo_img.width / logo_img.height))
+                logo_resized = logo_img.resize((logo_w, logo_h), Image.Resampling.LANCZOS)
+                
+                # Flip logo horizontally so the cat faces left
+                logo_flipped = logo_resized.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+                
+                logo_x = IMAGE_WIDTH - SAFE_MARGIN - logo_w
+                logo_y = 50
+                img.paste(logo_flipped, (logo_x, logo_y), mask=logo_flipped.split()[3])
+        except Exception as e:
+            print(f"Error loading logo {logo_path}: {e}")
+    
     # 3. Draw Divider line (4px thick, Teal accent, spanning usable width)
     divider_y = 180
     draw.rectangle(
@@ -418,7 +438,7 @@ def draw_card(row):
             if prim_list:
                 badge_y = draw_muscle_badges(
                     draw, "PRIMAIR", prim_list, SAFE_MARGIN, badge_y,
-                    bg_color="#CCFBF1", text_color="#0F766E", max_width=bottom_left_max_width
+                    bg_color="#FFEBE7", text_color="#C22E14", max_width=bottom_left_max_width
                 )
                 badge_y += 48
                 
